@@ -1,25 +1,26 @@
 {
 	"schema_version": 1,
 	"quilt_loader": {
-		"group": "com.example",
-		"id": "example_mod",
+		"group": "io.github.NalathniDragon",
+		"id": "pona-moku",
 		"version": "${version}",
 		"metadata": {
-			"name": "Mod Name",
-			"description": "A short description of your mod.",
+			"name": "pona moku",
+			"description": "Replacing Minecraft's hunger system with something more interesting.",
 			"contributors": {
-				"Your name here": "Owner"
+				"NalathniDragon": "Owner"
 			},
 			"contact": {
-				"homepage": "https://example.com/",
-				"issues": "https://github.com/QuiltMC/quilt-template-mod/issues",
-				"sources": "https://github.com/QuiltMC/quilt-template-mod"
+				"homepage": "https://github.com/NalathniDragon/pona-moku",
+				"issues": "https://github.com/NalathniDragon/pona-moku/issues",
+				"sources": "https://github.com/NalathniDragon/pona-moku"
 			},
-			"icon": "assets/example_mod/icon.png"
+			"icon": "assets/example_mod/icon.png",
+            "license": "MIT"
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
-			"init": "com.example.example_mod.ExampleMod"
+			"init": "io.github.NalathniDragon.pona-moku.pona-moku"
 		},
 		"depends": [
 			{
