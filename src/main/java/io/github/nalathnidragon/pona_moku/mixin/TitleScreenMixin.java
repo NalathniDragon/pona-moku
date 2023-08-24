@@ -1,6 +1,6 @@
-package io.github.NalathniDragon.PonaMoku.mixin;
+package io.github.nalathnidragon.pona_moku.mixin;
 
-import io.github.NalathniDragon.PonaMoku.PonaMoku;
+import io.github.nalathnidragon.pona_moku.PonaMoku;
 import net.minecraft.client.gui.screen.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
