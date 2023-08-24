@@ -1,4 +1,4 @@
-package io.github.NalathniDragon.PonaMoku;
+package io.github.nalathnidragon.pona_moku;
 
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
