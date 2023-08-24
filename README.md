@@ -4,13 +4,14 @@ A mod to replace Minecraft's uninteresting hunger system with food that gives di
 
 ## Roadmap
 ### Core
-- Remove baseline hunger mechanics
-- Food provides healing based on its nourishment value
+- Remove baseline hunger mechanics - mixins in `HungerManager` and `FoodComponent`
+  - Allow for an opt-out flag on individual players to make them use vanilla food mechanics instead?
+- Food provides healing based on its nourishment value - `HungerManager.eat` doesn't have a player reference, probably need to mixin `LivingEntity.applyFoodEffects`?
   - Heal amount scaled by config file
   - Tooltip shows health gain
-- Food takes time to consume proportional to the healing it provides
+- Food takes time to consume proportional to the healing it provides - mixin `Item.getMaxUseTime`
   - Eating time scaled by config file
-  - Taking damage interrupts eating
+  - Taking damage interrupts eating - [Fabrication reference](https://github.com/FalsehoodMC/Fabrication/blob/3.0/1.20.1/src/main/java/com/unascribed/fabrication/mixin/f_balance/interrupting_damage/MixinLivingEntity.java)
 - Food provides an absorption-like overshield based on its saturation value
   - Shield scaled by config file
   - UI for presenting shield level, can be ugly initially
