@@ -37,5 +37,5 @@
 			}
 		]
 	},
-	"mixin": "example_mod.mixins.json"
+	"mixin": "pona_moku.mixins.json"
 }
