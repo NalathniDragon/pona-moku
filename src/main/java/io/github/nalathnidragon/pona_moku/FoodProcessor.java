@@ -20,7 +20,7 @@ public class FoodProcessor {
 	private static float MAX_ABSORPTION_FROM_FOOD = 20;
 
 	private static int MIN_EAT_TIME = 8;
-	private static float EAT_TIME_PER_ABSORPTION = 8;
+	private static float EAT_TIME_PER_ABSORPTION = 32/6f; //bread standard
 	private static float EAT_TIME_PER_HEAL = 0; //defaults: less hearty foods are quicker to eat
 	private static Map<Item,Map<StatusEffect,Integer>> staticFoodBuffs;
 
@@ -55,13 +55,15 @@ public class FoodProcessor {
 	}
 	public static float absorptionFrom(FoodComponent food)
 	{
-		return Math.min(food.getHunger() * food.getSaturationModifier() * ABSORPTION_SCALE, MAX_ABSORPTION_FROM_FOOD);
+		//internal saturation modifier is half of what its effective value is, so we need to multiply by 2 here
+		return Math.min(food.getHunger() * food.getSaturationModifier() * 2 * ABSORPTION_SCALE, MAX_ABSORPTION_FROM_FOOD);
 	}
 
 	//TODO: inject into Item.getMaxUseTime
 	public static int eatTime(FoodComponent food)
 	{
-		return Math.round(Math.max(MIN_EAT_TIME, healingFrom(food) * EAT_TIME_PER_HEAL + absorptionFrom(food) * EAT_TIME_PER_ABSORPTION));
+		//divide by healing and absorption scale so they can be adjusted without also changing eat time
+		return Math.round(Math.max(MIN_EAT_TIME, healingFrom(food) * EAT_TIME_PER_HEAL / HEALTH_SCALE + absorptionFrom(food) * EAT_TIME_PER_ABSORPTION / ABSORPTION_SCALE));
 	}
 
 	public static boolean isFoodEffect(StatusEffectInstance effect, LivingEntity statusHaver)
@@ -84,6 +86,7 @@ public class FoodProcessor {
 		}
 		return clearedStatuses;
 	}
+
 	public static boolean applyFoodHealthToEntity(Item item, LivingEntity eater)
 	{
 		if(item.isFood())
