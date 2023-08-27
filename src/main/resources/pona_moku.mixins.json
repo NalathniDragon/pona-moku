@@ -4,13 +4,11 @@
 	"package": "io.github.nalathnidragon.pona_moku.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-    "ItemMixin"
-  ],
-	"client": [
-		"TitleScreenMixin",
+    "ItemMixin",
     "LivingEntityMixin",
     "PlayerEntityMixin"
-	],
+  ],
+	"client": [	],
 	"injectors": {
 		"defaultRequire": 1
 	}

@@ -59,7 +59,6 @@ public class FoodProcessor {
 		return Math.min(food.getHunger() * food.getSaturationModifier() * 2 * ABSORPTION_SCALE, MAX_ABSORPTION_FROM_FOOD);
 	}
 
-	//TODO: inject into Item.getMaxUseTime
 	public static int eatTime(FoodComponent food)
 	{
 		//divide by healing and absorption scale so they can be adjusted without also changing eat time
@@ -71,13 +70,13 @@ public class FoodProcessor {
 		return effect.isInfinite();
 	}
 
-	//TODO: make a mixin to inject calls to clearFoodEffects and applyFoodHealthToEntity at the top of LivingEntity.applyFoodEffects
-	// (we will probably replace applyFoodEffects entirely at some point in order to account for dynamic foods)
+	//TODO Known bug: a shorter-duration stronger effect can mask a food effect and prevent it from being cleared
 
 	public static Collection<StatusEffectInstance> clearFoodEffects(LivingEntity entity)
 	{
 		Collection<StatusEffectInstance> clearedStatuses = new ArrayList<>();
-		Collection<StatusEffectInstance> activeStatuses = entity.getStatusEffects();
+		//need to clone the list to avoid ConcurrentModificationException
+		Collection<StatusEffectInstance> activeStatuses = new ArrayList<>(entity.getStatusEffects());
 		for (StatusEffectInstance status:activeStatuses) {
 			if(isFoodEffect(status, entity)) {
 				entity.removeStatusEffect(status.getEffectType());
