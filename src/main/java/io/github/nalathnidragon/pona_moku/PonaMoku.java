@@ -6,9 +6,6 @@ import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PonaMoku implements ModInitializer {
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod name as the logger's name.
@@ -19,11 +16,6 @@ public class PonaMoku implements ModInitializer {
 
 	@Override
 	public void onInitialize(ModContainer mod) {
-		List<String> ls = new ArrayList<>();
-		ls.add("general");
-		ls.add("foodHealingMultiplier");
 		LOGGER.info("Hello Quilt world from {}!", mod.metadata().name());
-		LOGGER.info("Value: %2.2f".formatted(CONFIG.general.foodHealingMultiplier.value()));
-		LOGGER.info("Value: %2.2f".formatted((double)CONFIG.getValue(ls).value()));
 	}
 }
