@@ -7,6 +7,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +31,9 @@ public class FoodProcessor {
 	}
 	public static void reloadConfig()
 	{
+		HashMap<StatusEffect,Integer> rabbit_test = new HashMap<>();
+		rabbit_test.put(StatusEffects.JUMP_BOOST, 0);
+		staticFoodBuffs.put(Items.COOKED_RABBIT,rabbit_test);
 		//TODO: figure out how to get Item and StatusEffect instances from IDs in the config file
 	}
 
