@@ -4,11 +4,12 @@
 	"package": "io.github.nalathnidragon.pona_moku.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-    "HungerManagerMixin"
+    "HungerManagerMixin",
+    "ItemMixin",
+    "LivingEntityMixin",
+    "PlayerEntityMixin"
   ],
-	"client": [
-		"TitleScreenMixin"
-	],
+	"client": [	],
 	"injectors": {
 		"defaultRequire": 1
 	}
