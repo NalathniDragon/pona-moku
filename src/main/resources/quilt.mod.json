@@ -2,7 +2,7 @@
 	"schema_version": 1,
 	"quilt_loader": {
 		"group": "io.github.nalathnidragon",
-		"id": "pona-moku",
+		"id": "pona_moku",
 		"version": "${version}",
 		"metadata": {
 			"name": "pona moku",
@@ -15,8 +15,7 @@
 				"issues": "https://github.com/NalathniDragon/pona-moku/issues",
 				"sources": "https://github.com/NalathniDragon/pona-moku"
 			},
-			"icon": "assets/example_mod/icon.png",
-            "license": "MIT"
+      "license": "MIT"
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
@@ -37,5 +36,5 @@
 			}
 		]
 	},
-	"mixin": "example_mod.mixins.json"
+	"mixin": "pona_moku.mixins.json"
 }
