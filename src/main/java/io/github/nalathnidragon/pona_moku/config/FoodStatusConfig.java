@@ -2,55 +2,75 @@ package io.github.nalathnidragon.pona_moku.config;
 
 import io.github.nalathnidragon.pona_moku.PonaMoku;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import org.quiltmc.config.api.ReflectiveConfig;
-import org.quiltmc.config.api.values.TrackedValue;
-import org.quiltmc.config.api.values.ValueMap;
-import org.quiltmc.loader.api.config.v2.QuiltConfig;
+import org.quiltmc.loader.api.QuiltLoader;
+import org.quiltmc.loader.impl.lib.electronwill.nightconfig.core.CommentedConfig;
+import org.quiltmc.loader.impl.lib.electronwill.nightconfig.core.Config;
+import org.quiltmc.loader.impl.lib.electronwill.nightconfig.toml.TomlFormat;
+import org.quiltmc.loader.impl.lib.electronwill.nightconfig.toml.TomlParser;
 
+import java.io.*;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FoodStatusConfig extends ReflectiveConfig {
-	public static final FoodStatusConfig instance =
-		QuiltConfig.create(
-			PonaMoku.MODID, // what the folder is called ".../.minecraft/config/pona_moku/" in this case
-			"food_status_effects", // what the file is called. "food_status_effects.toml" in this case
-			FoodStatusConfig.class);
+public abstract class FoodStatusConfig {
+	private static CommentedConfig config = null;
+	static {loadConfig();}
 
-	public final TrackedValue<ValueMap<ValueMap<Integer>>> foods =
-		value(
-			ValueMap.builder(
-				ValueMap.builder(0).build()
-			).build()
-		);
+	// only getFoodStatus accesses this. It will generate this if needed.
+	private static Map<Item, Map<StatusEffect, Integer>> foodStatus = null;
 
-	public Map<Item, Map<StatusEffect, Integer>> getFoodStatus() {
+	public static boolean loadConfig() {
+		foodStatus = null; // mark foodStatus for reconstruction
+		try {
+			File file = new File(
+				QuiltLoader.getConfigDir().toFile() + File.separator + PonaMoku.MODID,
+				"food_status_effects.toml"
+			);
+			file.getParentFile().mkdirs();
+			file.createNewFile();
+			try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
+				config = new TomlParser().parse(reader);
+			}
+		} catch (Exception e) {
+			PonaMoku.LOGGER.error("Error attempting to parse food_status_effects.toml. " +
+				"Food will not have any status effects.", e);
+			config = TomlFormat.instance().createConfig();
+			return false;
+		}
+		return true;
+	}
+
+	public static Map<Item, Map<StatusEffect, Integer>> getFoodStatus() {
+		// No need to reconstruct our cached value
+		if (foodStatus != null) return foodStatus;
+		if (config == null) loadConfig();
+
 		// TODO: libraries can do this with much simpler code. I should relearn how to use those :P
 		Map<Item, Map<StatusEffect, Integer>> map = new HashMap<>();
-		for(String itemID : foods.value().keySet()) {
+		for(String itemID : config.valueMap().keySet()) {
+			Config foodMap = config.get(itemID);
 			Item item = Registries.ITEM.get(new Identifier(itemID));
 			// TODO: Throw an error? Warn the user somehow that the itemID was invalid
 			if (item == Items.AIR) continue; // AIR seems to be the default. itemID was invalid or user wants to eat air
 			// the above check is made redundant by the check below
 			// but having 2 checks might make more meaningful error messages when those are implemented
 			if (!item.isFood()) continue;
-			for(String effectID : foods.value().get(itemID).keySet()){
+			for(String effectID : foodMap.valueMap().keySet()){
 				StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(effectID));
 				// TODO: Throw an error? Warn the user somehow that the effectID was invalid
-				// Luck is the default value. If the effect is luck but the effect id isn't luck, the entry is invalid
-				if(effect == StatusEffects.LUCK && !effectID.equals("minecraft:luck")) continue;
-				Integer amp = foods.value().get(itemID).get(effectID);
+				if(effect == null) continue;
+				Integer amp = foodMap.get(effectID);
 				if (amp == null) continue; // TODO: again, warn the user / throw and error
 				Map<StatusEffect, Integer> effects = map.getOrDefault(item, new HashMap<>());
 				effects.put(effect, amp);
 				map.put(item, effects);
 			}
 		}
-		return map;
+		return foodStatus = map;
 	}
 }
