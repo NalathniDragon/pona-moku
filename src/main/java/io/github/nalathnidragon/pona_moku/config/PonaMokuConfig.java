@@ -10,11 +10,12 @@ import org.quiltmc.config.api.values.ValueMap;
 import org.quiltmc.loader.api.config.v2.QuiltConfig;
 
 public final class PonaMokuConfig extends ReflectiveConfig {
-	public static final PonaMokuConfig INSTANCE =
+	public static final PonaMokuConfig instance =
 		QuiltConfig.create(
 			PonaMoku.MODID, // what the folder is called ".../.minecraft/config/pona_moku/" in this case
 			"config", // what the file is called. "config.toml" in this case
 			PonaMokuConfig.class);
+
 
 	@Comment("Test Value")
 	public final TrackedValue<Double> test = value(1.0);

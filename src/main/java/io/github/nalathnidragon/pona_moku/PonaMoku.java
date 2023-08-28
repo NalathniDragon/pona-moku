@@ -12,7 +12,7 @@ public class PonaMoku implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger("pona moku");
 	public static final String MODID = "pona_moku";
-	public static final PonaMokuConfig CONFIG = PonaMokuConfig.INSTANCE;
+	public static final PonaMokuConfig config = PonaMokuConfig.instance;
 
 	@Override
 	public void onInitialize(ModContainer mod) {
