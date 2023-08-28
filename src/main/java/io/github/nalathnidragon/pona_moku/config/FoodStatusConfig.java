@@ -5,6 +5,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.quiltmc.loader.api.QuiltLoader;
 import org.quiltmc.loader.impl.lib.electronwill.nightconfig.core.CommentedConfig;
@@ -39,18 +40,16 @@ public abstract class FoodStatusConfig {
 		} catch (Exception e) {
 			PonaMoku.LOGGER.error("Error attempting to parse food_status_effects.toml. " +
 				"Food will not have any status effects.", e);
-			config = TomlFormat.instance().createConfig();
+			config = TomlFormat.instance().createConfig(); // blank
 			return false;
 		}
 		return true;
 	}
 
 	public static Map<Item, Map<StatusEffect, Integer>> getFoodStatus() {
-		// No need to reconstruct our cached value
-		if (foodStatus != null) return foodStatus;
+		if (foodStatus != null) return foodStatus; // No need to reconstruct our cached value
 		if (config == null) loadConfig();
 
-		// TODO: libraries can do this with much simpler code. I should relearn how to use those :P
 		Map<Item, Map<StatusEffect, Integer>> map = new HashMap<>();
 		for(String itemID : config.valueMap().keySet()) {
 			Config foodMap = config.get(itemID);
@@ -60,7 +59,7 @@ public abstract class FoodStatusConfig {
 			// the above check is made redundant by the check below
 			// but having 2 checks might make more meaningful error messages when those are implemented
 			if (!item.isFood()) continue;
-			for(String effectID : foodMap.valueMap().keySet()){
+			for(String effectID : foodMap.valueMap().keySet()) {
 				StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(effectID));
 				// TODO: Throw an error? Warn the user somehow that the effectID was invalid
 				if(effect == null) continue;
