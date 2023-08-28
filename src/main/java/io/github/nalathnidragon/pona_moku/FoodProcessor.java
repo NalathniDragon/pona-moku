@@ -1,5 +1,6 @@
 package io.github.nalathnidragon.pona_moku;
 
+import io.github.nalathnidragon.pona_moku.config.FoodStatusConfig;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -25,16 +26,12 @@ public class FoodProcessor {
 	private static Map<Item,Map<StatusEffect,Integer>> staticFoodBuffs;
 
 	static {
-		staticFoodBuffs = new HashMap<>();
-		//TODO: load these from a config file of e.g. {"minecraft:cookie": {"minecraft:speed": 1}}
+		staticFoodBuffs = FoodStatusConfig.getFoodStatus();
 		// future: for item IDs missing from the config, derive statuses from ingredient effect strengths in recipe tree
 	}
 	public static void reloadConfig()
 	{
-		HashMap<StatusEffect,Integer> rabbit_test = new HashMap<>();
-		rabbit_test.put(StatusEffects.JUMP_BOOST, 0);
-		staticFoodBuffs.put(Items.COOKED_RABBIT,rabbit_test);
-		//TODO: figure out how to get Item and StatusEffect instances from IDs in the config file
+		staticFoodBuffs = FoodStatusConfig.getFoodStatus();
 	}
 
 	public static Collection<StatusEffectInstance> getStatusInstancesFrom(ItemStack stack){
@@ -44,7 +41,7 @@ public class FoodProcessor {
 		if(staticEffects != null){
 			for(StatusEffect s:staticEffects.keySet())
 			{
-				statuses.add(new StatusEffectInstance(s, StatusEffectInstance.INFINITE_DURATION,staticEffects.get(s)));
+				statuses.add(new StatusEffectInstance(s, StatusEffectInstance.INFINITE_DURATION,staticEffects.get(s),true,true));
 			}
 		}
 		return statuses;
@@ -86,15 +83,28 @@ public class FoodProcessor {
 		return clearedStatuses;
 	}
 
+	public static void applyHungerScaledHealth(LivingEntity target, float health, float absorption)
+	{
+		float scale=1;
+		if(target.hasStatusEffect(StatusEffects.HUNGER)) {
+			float hunger = target.getStatusEffect(StatusEffects.HUNGER).getAmplifier() + 1;
+			scale /= (hunger+1);
+		}
+		if(target.hasStatusEffect(StatusEffects.SATURATION)) {
+			float saturation = target.getStatusEffect(StatusEffects.SATURATION).getAmplifier() + 1;
+			scale *= (saturation+1);
+		}
+		//If they have the absorption effect, clear it so that it doesn't mess with the food's absorption when it expires
+		target.removeStatusEffect(StatusEffects.ABSORPTION);
+		target.setAbsorptionAmount(scale*absorption);
+		target.heal(scale*health);
+	}
 	public static boolean applyFoodHealthToEntity(Item item, LivingEntity eater)
 	{
 		if(item.isFood())
 		{
 			FoodComponent food = item.getFoodComponent();
-			//If they have the absorption effect, clear it so that it doesn't mess with the food's absorption when it expires
-			eater.removeStatusEffect(StatusEffects.ABSORPTION);
-			eater.setAbsorptionAmount(absorptionFrom(food));
-			eater.heal(healingFrom(food));
+			applyHungerScaledHealth(eater,healingFrom(food),absorptionFrom(food));
 			return true;
 		}
 		else
