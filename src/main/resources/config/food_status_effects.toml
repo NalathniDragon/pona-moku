@@ -27,10 +27,10 @@
 # tbd
 
 ["minecraft:cooked_mutton"]
-# tbd
+"minecraft:strength"=0
 
 ["minecraft:cooked_porkchop"]
-# tbd
+"minecraft:strength"=0
 
 ["minecraft:cooked_rabbit"]
 "minecraft:jump_boost"=0
@@ -39,7 +39,7 @@
 # tbd
 
 ["minecraft:cookie"]
-# tbd
+"minecraft:speed"=0 #let's pretent they're sugary
 
 ["minecraft:dried_kelp"]
 "minecraft:water_breathing"=0
@@ -96,10 +96,10 @@
 # tbd
 
 ["minecraft:raw_mutton"]
-# tbd
+# latent strength
 
 ["minecraft:raw_porkchop"]
-# tbd
+# latent strength
 
 ["minecraft:raw_rabbit"]
 # latent jump boost
@@ -108,7 +108,7 @@
 # tbd
 
 ["minecraft:rotten_flesh"]
-# tbd
+# tbd/does its own thing
 
 ["minecraft:spider_eye"]
 # does its own thing but could be more interesting

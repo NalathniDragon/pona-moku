@@ -41,7 +41,7 @@ public class FoodProcessor {
 		if(staticEffects != null){
 			for(StatusEffect s:staticEffects.keySet())
 			{
-				statuses.add(new StatusEffectInstance(s, StatusEffectInstance.INFINITE_DURATION,staticEffects.get(s)));
+				statuses.add(new StatusEffectInstance(s, StatusEffectInstance.INFINITE_DURATION,staticEffects.get(s),true,true));
 			}
 		}
 		return statuses;
@@ -83,15 +83,28 @@ public class FoodProcessor {
 		return clearedStatuses;
 	}
 
+	public static void applyHungerScaledHealth(LivingEntity target, float health, float absorption)
+	{
+		float scale=1;
+		if(target.hasStatusEffect(StatusEffects.HUNGER)) {
+			float hunger = target.getStatusEffect(StatusEffects.HUNGER).getAmplifier() + 1;
+			scale /= (hunger+1);
+		}
+		if(target.hasStatusEffect(StatusEffects.SATURATION)) {
+			float saturation = target.getStatusEffect(StatusEffects.SATURATION).getAmplifier() + 1;
+			scale *= (saturation+1);
+		}
+		//If they have the absorption effect, clear it so that it doesn't mess with the food's absorption when it expires
+		target.removeStatusEffect(StatusEffects.ABSORPTION);
+		target.setAbsorptionAmount(scale*absorption);
+		target.heal(scale*health);
+	}
 	public static boolean applyFoodHealthToEntity(Item item, LivingEntity eater)
 	{
 		if(item.isFood())
 		{
 			FoodComponent food = item.getFoodComponent();
-			//If they have the absorption effect, clear it so that it doesn't mess with the food's absorption when it expires
-			eater.removeStatusEffect(StatusEffects.ABSORPTION);
-			eater.setAbsorptionAmount(absorptionFrom(food));
-			eater.heal(healingFrom(food));
+			applyHungerScaledHealth(eater,healingFrom(food),absorptionFrom(food));
 			return true;
 		}
 		else
