@@ -25,12 +25,14 @@ public class FoodProcessor {
 	private static Map<Item,Map<StatusEffect,Integer>> staticFoodBuffs;
 
 	static {
-		staticFoodBuffs = new HashMap<>();
+		reloadConfig();
 		//TODO: load these from a config file of e.g. {"minecraft:cookie": {"minecraft:speed": 1}}
 		// future: for item IDs missing from the config, derive statuses from ingredient effect strengths in recipe tree
 	}
+
 	public static void reloadConfig()
 	{
+		staticFoodBuffs = new HashMap<>();
 		HashMap<StatusEffect,Integer> rabbit_test = new HashMap<>();
 		rabbit_test.put(StatusEffects.JUMP_BOOST, 0);
 		staticFoodBuffs.put(Items.COOKED_RABBIT,rabbit_test);
@@ -106,7 +108,7 @@ public class FoodProcessor {
 	public static void applyFoodStatusesToEntity(ItemStack stack, LivingEntity eater)
 	{
 		Collection<StatusEffectInstance> statuses = getStatusInstancesFrom(stack);
-		for(StatusEffectInstance instance:statuses){
+		for(StatusEffectInstance instance:statuses) {
 			eater.addStatusEffect(instance);
 		}
 	}
