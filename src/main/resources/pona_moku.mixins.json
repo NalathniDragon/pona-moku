@@ -8,7 +8,9 @@
     "LivingEntityMixin",
     "PlayerEntityMixin"
   ],
-	"client": [	],
+	"client": [
+    "ItemStackMixin"
+  ],
 	"injectors": {
 		"defaultRequire": 1
 	}
