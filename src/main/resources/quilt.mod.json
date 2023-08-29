@@ -15,6 +15,7 @@
 				"issues": "https://github.com/NalathniDragon/pona-moku/issues",
 				"sources": "https://github.com/NalathniDragon/pona-moku"
 			},
+			"icon": "assets/pona_moku/pona_moku.png",
       "license": "MIT"
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
