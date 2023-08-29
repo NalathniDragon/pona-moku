@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -45,6 +46,10 @@ public abstract class ItemStackMixin {
 			label=label.append(Text.literal(String.format(" ❤%.1f",absorbHearts)).formatted(Formatting.YELLOW));
 			label=label.append(Text.literal(String.format(" %.1fs",this.getMaxUseTime()/20.0)).formatted(Formatting.GRAY));
 			list.add(label);
+		}
+		else if(FoodProcessor.proxies.containsKey(this.getItem()))
+		{
+			list.add(FoodProcessor.tooltipProxy(FoodProcessor.proxies.get(this.getItem())));
 		}
 		Map<StatusEffect,Integer> statuses = FoodProcessor.staticFoodBuffs.get(this.getItem());
 		if(statuses != null)
