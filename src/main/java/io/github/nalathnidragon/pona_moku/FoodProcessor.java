@@ -23,7 +23,7 @@ public class FoodProcessor {
 	private static int MIN_EAT_TIME = 8;
 	private static float EAT_TIME_PER_ABSORPTION = 32/6f; //bread standard
 	private static float EAT_TIME_PER_HEAL = 0; //defaults: less hearty foods are quicker to eat
-	private static Map<Item,Map<StatusEffect,Integer>> staticFoodBuffs;
+	public static Map<Item,Map<StatusEffect,Integer>> staticFoodBuffs;
 
 	static {
 		staticFoodBuffs = FoodStatusConfig.getFoodStatus();
