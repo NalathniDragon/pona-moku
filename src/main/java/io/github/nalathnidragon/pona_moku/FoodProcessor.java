@@ -41,7 +41,7 @@ public class FoodProcessor {
 		if(staticEffects != null){
 			for(StatusEffect s:staticEffects.keySet())
 			{
-				statuses.add(new StatusEffectInstance(s, StatusEffectInstance.INFINITE_DURATION,staticEffects.get(s),true,true));
+				if(staticEffects.get(s) >= 0) statuses.add(new StatusEffectInstance(s, StatusEffectInstance.INFINITE_DURATION,staticEffects.get(s),true,true));
 			}
 		}
 		return statuses;
@@ -64,13 +64,20 @@ public class FoodProcessor {
 
 	public static boolean isFoodEffect(StatusEffectInstance effect, LivingEntity statusHaver)
 	{
-		return effect.isInfinite();
+		if(effect==null) return false;
+		if(effect.isInfinite() && effect.isAmbient()) return true;
+		return false;
 	}
 
-	//TODO Known bug: a shorter-duration stronger effect can mask a food effect and prevent it from being cleared
 
-	public static Collection<StatusEffectInstance> clearFoodEffects(LivingEntity entity)
+
+	public static void clearFoodEffects(LivingEntity entity)
 	{
+		//keeping it simple by just clearing all statuses
+		entity.clearStatusEffects();
+		/*
+		//Known bug: a shorter-duration stronger effect can mask a food effect and prevent it from being cleared
+
 		Collection<StatusEffectInstance> clearedStatuses = new ArrayList<>();
 		//need to clone the list to avoid ConcurrentModificationException
 		Collection<StatusEffectInstance> activeStatuses = new ArrayList<>(entity.getStatusEffects());
@@ -81,6 +88,8 @@ public class FoodProcessor {
 			}
 		}
 		return clearedStatuses;
+
+		 */
 	}
 
 	public static void applyHungerScaledHealth(LivingEntity target, float health, float absorption)

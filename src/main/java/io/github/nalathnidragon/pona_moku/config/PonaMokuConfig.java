@@ -16,6 +16,7 @@ public final class PonaMokuConfig extends ReflectiveConfig {
 			"config", // what the file is called. "config.toml" in this case
 			PonaMokuConfig.class);
 
+	public final TrackedValue<Boolean> nausea_prevents_eating = value(true);
 
 	@Comment("Test Value")
 	public final TrackedValue<Double> test = value(1.0);
