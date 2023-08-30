@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Item.class)
-public class ItemMixin {
+public abstract class ItemMixin {
 	@Inject(method = "getMaxUseTime", at = @At("HEAD"), cancellable=true)
 	public void eatDelay(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
 		if(stack.isFood()) {
