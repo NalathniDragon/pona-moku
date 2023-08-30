@@ -10,7 +10,8 @@
     "CakeBlockMixin"
   ],
 	"client": [
-    "ItemStackMixin"
+    "ItemStackMixin",
+    "InGameHudMixin"
   ],
 	"injectors": {
 		"defaultRequire": 1
