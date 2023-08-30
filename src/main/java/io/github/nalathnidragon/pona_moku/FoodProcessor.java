@@ -1,6 +1,7 @@
 package io.github.nalathnidragon.pona_moku;
 
 import io.github.nalathnidragon.pona_moku.config.FoodStatusConfig;
+import io.github.nalathnidragon.pona_moku.mixin.HiddenEffectAccessorMixin;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -97,11 +98,6 @@ public class FoodProcessor {
 
 	public static void clearFoodEffects(LivingEntity entity)
 	{
-		//keeping it simple by just clearing all statuses
-		entity.clearStatusEffects();
-		/*
-		//Known bug: a shorter-duration stronger effect can mask a food effect and prevent it from being cleared
-
 		Collection<StatusEffectInstance> clearedStatuses = new ArrayList<>();
 		//need to clone the list to avoid ConcurrentModificationException
 		Collection<StatusEffectInstance> activeStatuses = new ArrayList<>(entity.getStatusEffects());
@@ -109,11 +105,10 @@ public class FoodProcessor {
 			if(isFoodEffect(status, entity)) {
 				entity.removeStatusEffect(status.getEffectType());
 				clearedStatuses.add(status);
+			} else if (isFoodEffect(((HiddenEffectAccessorMixin)status).getHiddenEffect(),entity)){
+				((HiddenEffectAccessorMixin)status).setHiddenEffect(null);
 			}
 		}
-		return clearedStatuses;
-
-		 */
 	}
 
 	public static void applyHungerScaledHealth(LivingEntity target, float health, float absorption)
