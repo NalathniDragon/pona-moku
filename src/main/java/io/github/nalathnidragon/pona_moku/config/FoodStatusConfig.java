@@ -12,7 +12,6 @@ import org.quiltmc.loader.impl.lib.electronwill.nightconfig.core.CommentedConfig
 import org.quiltmc.loader.impl.lib.electronwill.nightconfig.core.Config;
 import org.quiltmc.loader.impl.lib.electronwill.nightconfig.toml.TomlFormat;
 import org.quiltmc.loader.impl.lib.electronwill.nightconfig.toml.TomlParser;
-import org.quiltmc.loader.impl.lib.electronwill.nightconfig.toml.TomlWriter;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -22,7 +21,6 @@ import java.util.Map;
 
 public abstract class FoodStatusConfig {
 	private static CommentedConfig config = null;
-	static {loadConfig();}
 
 	// only getFoodStatus accesses this. It will generate this if needed.
 	private static Map<Item, Map<StatusEffect, Integer>> foodStatus = null;
@@ -36,19 +34,17 @@ public abstract class FoodStatusConfig {
 				QuiltLoader.getConfigDir().toFile() + File.separator + PonaMoku.MODID,
 				"food_status_effects.toml"
 			);
+
 			if (!file.exists()){
 				if (!file.createNewFile()) throw new RuntimeException("Cannot create file %s".formatted(file.toString()));
 				try (
 					InputStream input = new BufferedInputStream(ponamoku.getClass().getResourceAsStream("/config/food_status_effects.toml"));
 					OutputStream output = new BufferedOutputStream(new FileOutputStream(file))
-				){
-					config = new TomlParser().parse(input);
-					new TomlWriter().write(config, output);
-				}
-			} else {
-				try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
-					config = new TomlParser().parse(reader);
-				}
+				){output.write(input.readAllBytes());}
+			}
+
+			try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
+				config = new TomlParser().parse(reader);
 			}
 		} catch (Exception e) {
 			PonaMoku.LOGGER.error("Error attempting to parse food_status_effects.toml. " +
