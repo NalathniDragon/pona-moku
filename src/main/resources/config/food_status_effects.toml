@@ -1,5 +1,16 @@
+#ingredients
 ["minecraft:kelp"]
 "minecraft:water_breathing"=-1
+["minecraft:pumpkin"]
+"minecraft:invisibility"=-1
+["minecraft:brown_mushroom"]
+"minecraft:haste"=-1
+["minecraft:red_mushroom"]
+"minecraft:haste"=-1
+["minecraft:sugar"]
+"minecraft:speed"=-1
+["minecraft:cocoa_beans"]
+"minecraft:speed"=-1
 
 ["minecraft:apple"]
 # tbd, maybe latent speed for fruit
@@ -120,9 +131,6 @@
 
 ["minecraft:cooked_beef"]
 "minecraft:strength"=0
-
-["minecraft:sugar"]
-"minecraft:speed"=-1
 
 ["minecraft:suspicious_stew"]
 "minecraft:haste"=1 # two mushrooms
