@@ -1,6 +1,8 @@
 package io.github.nalathnidragon.pona_moku;
 
 import io.github.nalathnidragon.pona_moku.config.FoodStatusConfig;
+import io.github.nalathnidragon.pona_moku.config.PonaMokuConfig;
+import io.github.nalathnidragon.pona_moku.mixin.HiddenEffectAccessorMixin;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -9,6 +11,10 @@ import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import org.quiltmc.config.api.Config;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,15 +29,35 @@ public class FoodProcessor {
 	private static int MIN_EAT_TIME = 8;
 	private static float EAT_TIME_PER_ABSORPTION = 32/6f; //bread standard
 	private static float EAT_TIME_PER_HEAL = 0; //defaults: less hearty foods are quicker to eat
-	private static Map<Item,Map<StatusEffect,Integer>> staticFoodBuffs;
-
+	public static Map<Item,Map<StatusEffect,Integer>> staticFoodBuffs;
+	public static Map<Item,FoodProxyInfo> proxies;
+	public static final Config.UpdateCallback callback;
 	static {
-		staticFoodBuffs = FoodStatusConfig.getFoodStatus();
+		callback = new Config.UpdateCallback() {
+			@Override
+			public void onUpdate(Config config) {
+				reloadConfig();
+			}
+		};
+		//took this out because it doesn't seem to work the way I expect and I don't want it to cause problems.
+		//PonaMokuConfig.instance.registerCallback(callback);
+
+		proxies = new HashMap<>();
+		proxies.put(Items.CAKE,new FoodProxyInfo(2, 0.1f, 6));
 		// future: for item IDs missing from the config, derive statuses from ingredient effect strengths in recipe tree
+		reloadConfig();
 	}
+
+
 	public static void reloadConfig()
 	{
 		staticFoodBuffs = FoodStatusConfig.getFoodStatus();
+		HEALTH_SCALE = PonaMokuConfig.instance.health_scale.value();
+		ABSORPTION_SCALE = PonaMokuConfig.instance.absorption_scale.value();
+		MAX_ABSORPTION_FROM_FOOD = PonaMokuConfig.instance.max_absorption_from_food.value();
+		MIN_EAT_TIME = PonaMokuConfig.instance.min_eat_time.value();
+		EAT_TIME_PER_ABSORPTION = PonaMokuConfig.instance.eat_time_per_absorption.value();
+		EAT_TIME_PER_HEAL = PonaMokuConfig.instance.eat_time_per_health.value();
 	}
 
 	public static Collection<StatusEffectInstance> getStatusInstancesFrom(ItemStack stack){
@@ -41,10 +67,36 @@ public class FoodProcessor {
 		if(staticEffects != null){
 			for(StatusEffect s:staticEffects.keySet())
 			{
-				statuses.add(new StatusEffectInstance(s, StatusEffectInstance.INFINITE_DURATION,staticEffects.get(s),true,true));
+				if(staticEffects.get(s) >= 0) statuses.add(new StatusEffectInstance(s, StatusEffectInstance.INFINITE_DURATION,staticEffects.get(s),true,true));
 			}
 		}
 		return statuses;
+	}
+	public static void eatProxy(LivingEntity eater, Item item)
+	{
+		FoodProxyInfo proxyInfo = proxies.get(item);
+		if(proxyInfo != null) {
+			clearFoodEffects(eater);
+			applyHungerScaledHealth(eater, proxyInfo.hunger * HEALTH_SCALE, proxyInfo.hunger * proxyInfo.saturationMultiplier * 2 * ABSORPTION_SCALE);
+			applyFoodStatusesToEntity(item.getDefaultStack(), eater);
+		}
+		else PonaMoku.LOGGER.error("tried to eat proxy for "+item.getName()+" but it wasn't in proxy map");
+	}
+
+	public static Text tooltipStats(float healHearts, float absorbHearts, float usageTime, int slices)
+	{
+		MutableText label=Text.empty();
+		if(healHearts > 0) label=label.append(Text.literal(String.format("❤+%.1f ",healHearts)).formatted(Formatting.RED));
+		if(absorbHearts > 0) label=label.append(Text.literal(String.format("❤%.1f ",absorbHearts)).formatted(Formatting.YELLOW));
+		if(usageTime > 0) label=label.append(Text.literal(String.format("%.1fs ",usageTime)).formatted(Formatting.GRAY));
+		if(slices > 0) label=label.append(Text.literal(String.format("x%d",slices)).formatted(Formatting.GRAY));
+		return label;
+	}
+
+	public static Text tooltipProxy(FoodProxyInfo info){
+		float absorbHearts = info.hunger * info.saturationMultiplier * ABSORPTION_SCALE * 2 / 2; //double sat, half heart, for clarity
+		float healHearts = info.hunger * HEALTH_SCALE / 2;
+		return tooltipStats(healHearts, absorbHearts, 0, info.slices);
 	}
 	public static float healingFrom(FoodComponent food)
 	{
@@ -59,17 +111,23 @@ public class FoodProcessor {
 	public static int eatTime(FoodComponent food)
 	{
 		//divide by healing and absorption scale so they can be adjusted without also changing eat time
-		return Math.round(Math.max(MIN_EAT_TIME, healingFrom(food) * EAT_TIME_PER_HEAL / HEALTH_SCALE + absorptionFrom(food) * EAT_TIME_PER_ABSORPTION / ABSORPTION_SCALE));
+		float time = 0;
+		//avoid dividing by zero
+		if(HEALTH_SCALE > 0) time+=healingFrom(food) * EAT_TIME_PER_HEAL / HEALTH_SCALE;
+		if(ABSORPTION_SCALE > 0) time+= absorptionFrom(food) * EAT_TIME_PER_ABSORPTION / ABSORPTION_SCALE;
+		return Math.round(Math.max(MIN_EAT_TIME, time ));
 	}
 
 	public static boolean isFoodEffect(StatusEffectInstance effect, LivingEntity statusHaver)
 	{
-		return effect.isInfinite();
+		if(effect==null) return false;
+		if(effect.isInfinite() && effect.isAmbient()) return true;
+		return false;
 	}
 
-	//TODO Known bug: a shorter-duration stronger effect can mask a food effect and prevent it from being cleared
 
-	public static Collection<StatusEffectInstance> clearFoodEffects(LivingEntity entity)
+
+	public static void clearFoodEffects(LivingEntity entity)
 	{
 		Collection<StatusEffectInstance> clearedStatuses = new ArrayList<>();
 		//need to clone the list to avoid ConcurrentModificationException
@@ -78,9 +136,10 @@ public class FoodProcessor {
 			if(isFoodEffect(status, entity)) {
 				entity.removeStatusEffect(status.getEffectType());
 				clearedStatuses.add(status);
+			} else if (isFoodEffect(((HiddenEffectAccessorMixin)status).getHiddenEffect(),entity)){
+				((HiddenEffectAccessorMixin)status).setHiddenEffect(null);
 			}
 		}
-		return clearedStatuses;
 	}
 
 	public static void applyHungerScaledHealth(LivingEntity target, float health, float absorption)

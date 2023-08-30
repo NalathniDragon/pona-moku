@@ -1,3 +1,17 @@
+#ingredients
+["minecraft:kelp"]
+"minecraft:water_breathing"=-1
+["minecraft:pumpkin"]
+"minecraft:invisibility"=-1
+["minecraft:brown_mushroom"]
+"minecraft:haste"=-1
+["minecraft:red_mushroom"]
+"minecraft:haste"=-1
+["minecraft:sugar"]
+"minecraft:speed"=-1
+["minecraft:cocoa_beans"]
+"minecraft:speed"=-1
+
 ["minecraft:apple"]
 # tbd, maybe latent speed for fruit
 
@@ -5,18 +19,19 @@
 "minecraft:resistance"=0
 
 ["minecraft:beetroot"]
-# latent strength
+"minecraft:strength"=-1
 
 ["minecraft:beetroot_soup"]
-"minecraft:strength"=2 # triangular root of six beets
+"minecraft:strength"=2 # beetroots doubled twice for +2 ranks
 
 ["minecraft:bread"]
 # none - the generic food
 
-# cake needs handling as a special case
+["minecraft:cake"] #handled by proxy system
+"minecraft:speed"=0
 
 ["minecraft:carrot"]
-# latent night vision
+"minecraft:night_vision"=-1
 
 ["minecraft:chorus_fruit"]
 
@@ -24,7 +39,7 @@
 "minecraft:slow_falling"=0
 
 ["minecraft:cooked_cod"]
-# tbd
+"minecraft:dolphins_grace"=0
 
 ["minecraft:cooked_mutton"]
 "minecraft:strength"=0
@@ -36,10 +51,10 @@
 "minecraft:jump_boost"=0
 
 ["minecraft:cooked_salmon"]
-# tbd
+"minecraft:dolphins_grace"=0
 
 ["minecraft:cookie"]
-"minecraft:speed"=0 #let's pretent they're sugary
+"minecraft:speed"=0 #let's pretend they're sugary
 
 ["minecraft:dried_kelp"]
 "minecraft:water_breathing"=0
@@ -70,6 +85,7 @@
 # tbd, does its own thing
 
 ["minecraft:potato"]
+"minecraft:resistance"=-1
 # latent resistance
 
 ["minecraft:pufferfish"]
@@ -87,25 +103,25 @@
 "minecraft:resistance"=1
 
 ["minecraft:raw_beef"]
-# latent strength
+"minecraft:strength"=-1
 
 ["minecraft:raw_chicken"]
-# latent slow falling
+"minecraft:slow_falling"=-1
 
 ["minecraft:raw_cod"]
-# tbd
+"minecraft:dolphins_grace"=-1
 
 ["minecraft:raw_mutton"]
-# latent strength
+"minecraft:strength"=-1
 
 ["minecraft:raw_porkchop"]
-# latent strength
+"minecraft:strength"=-1
 
 ["minecraft:raw_rabbit"]
-# latent jump boost
+"minecraft:jump_boost"=-1
 
 ["minecraft:raw_salmon"]
-# tbd
+"minecraft:dolphins_grace"=-1
 
 ["minecraft:rotten_flesh"]
 # tbd/does its own thing

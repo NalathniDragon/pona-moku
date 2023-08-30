@@ -6,9 +6,14 @@
 	"mixins": [
     "ItemMixin",
     "LivingEntityMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "CakeBlockMixin",
+    "HiddenEffectAccessorMixin"
   ],
-	"client": [	],
+	"client": [
+    "ItemStackMixin",
+    "InGameHudMixin"
+  ],
 	"injectors": {
 		"defaultRequire": 1
 	}

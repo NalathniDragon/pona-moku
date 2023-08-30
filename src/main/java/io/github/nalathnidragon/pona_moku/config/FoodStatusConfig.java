@@ -71,8 +71,9 @@ public abstract class FoodStatusConfig {
 			if (item == Items.AIR) continue; // AIR seems to be the default. itemID was invalid or user wants to eat air
 			// the above check is made redundant by the check below
 			// but having 2 checks might make more meaningful error messages when those are implemented
-			if (!item.isFood()) continue;
-			for(String effectID : foodMap.valueMap().keySet()) {
+
+			for(String effectID : foodMap.valueMap().keySet()){
+
 				StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(effectID));
 				// TODO: Throw an error? Warn the user somehow that the effectID was invalid
 				if(effect == null) continue;
