@@ -1,5 +1,7 @@
 package io.github.nalathnidragon.pona_moku;
 
+import io.github.nalathnidragon.pona_moku.config.FoodStatusConfig;
+import io.github.nalathnidragon.pona_moku.mixin.HiddenEffectAccessorMixin;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -8,6 +10,9 @@ import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,21 +27,17 @@ public class FoodProcessor {
 	private static int MIN_EAT_TIME = 8;
 	private static float EAT_TIME_PER_ABSORPTION = 32/6f; //bread standard
 	private static float EAT_TIME_PER_HEAL = 0; //defaults: less hearty foods are quicker to eat
-	private static Map<Item,Map<StatusEffect,Integer>> staticFoodBuffs;
-
+	public static Map<Item,Map<StatusEffect,Integer>> staticFoodBuffs;
+	public static Map<Item,FoodProxyInfo> proxies;
 	static {
-		reloadConfig();
-		//TODO: load these from a config file of e.g. {"minecraft:cookie": {"minecraft:speed": 1}}
+		staticFoodBuffs = FoodStatusConfig.getFoodStatus();
+		proxies = new HashMap<>();
+		proxies.put(Items.CAKE,new FoodProxyInfo(2, 0.1f, 6));
 		// future: for item IDs missing from the config, derive statuses from ingredient effect strengths in recipe tree
 	}
-
 	public static void reloadConfig()
 	{
-		staticFoodBuffs = new HashMap<>();
-		HashMap<StatusEffect,Integer> rabbit_test = new HashMap<>();
-		rabbit_test.put(StatusEffects.JUMP_BOOST, 0);
-		staticFoodBuffs.put(Items.COOKED_RABBIT,rabbit_test);
-		//TODO: figure out how to get Item and StatusEffect instances from IDs in the config file
+		staticFoodBuffs = FoodStatusConfig.getFoodStatus();
 	}
 
 	public static Collection<StatusEffectInstance> getStatusInstancesFrom(ItemStack stack){
@@ -46,10 +47,29 @@ public class FoodProcessor {
 		if(staticEffects != null){
 			for(StatusEffect s:staticEffects.keySet())
 			{
-				statuses.add(new StatusEffectInstance(s, StatusEffectInstance.INFINITE_DURATION,staticEffects.get(s)));
+				if(staticEffects.get(s) >= 0) statuses.add(new StatusEffectInstance(s, StatusEffectInstance.INFINITE_DURATION,staticEffects.get(s),true,true));
 			}
 		}
 		return statuses;
+	}
+	public static void eatProxy(LivingEntity eater, Item item)
+	{
+		FoodProxyInfo proxyInfo = proxies.get(item);
+		if(proxyInfo != null) {
+			clearFoodEffects(eater);
+			applyHungerScaledHealth(eater, proxyInfo.hunger * HEALTH_SCALE, proxyInfo.hunger * proxyInfo.saturationMultiplier * 2 * ABSORPTION_SCALE);
+			applyFoodStatusesToEntity(item.getDefaultStack(), eater);
+		}
+		else PonaMoku.LOGGER.error("tried to eat proxy for "+item.getName()+" but it wasn't in proxy map");
+	}
+
+	public static Text tooltipProxy(FoodProxyInfo info){
+		float absorbHearts = info.hunger * info.saturationMultiplier * ABSORPTION_SCALE * 2 / 2; //double sat, half heart, for clarity
+		float healHearts = info.hunger * HEALTH_SCALE / 2;
+		MutableText label=Text.literal(String.format("❤+%.1f",healHearts)).formatted(Formatting.RED);
+		label=label.append(Text.literal(String.format(" ❤%.1f",absorbHearts)).formatted(Formatting.YELLOW));
+		label=label.append(Text.literal(String.format(" x%d",info.slices)).formatted(Formatting.GRAY));
+		return label;
 	}
 	public static float healingFrom(FoodComponent food)
 	{
@@ -69,12 +89,14 @@ public class FoodProcessor {
 
 	public static boolean isFoodEffect(StatusEffectInstance effect, LivingEntity statusHaver)
 	{
-		return effect.isInfinite();
+		if(effect==null) return false;
+		if(effect.isInfinite() && effect.isAmbient()) return true;
+		return false;
 	}
 
-	//TODO Known bug: a shorter-duration stronger effect can mask a food effect and prevent it from being cleared
 
-	public static Collection<StatusEffectInstance> clearFoodEffects(LivingEntity entity)
+
+	public static void clearFoodEffects(LivingEntity entity)
 	{
 		Collection<StatusEffectInstance> clearedStatuses = new ArrayList<>();
 		//need to clone the list to avoid ConcurrentModificationException
@@ -83,20 +105,34 @@ public class FoodProcessor {
 			if(isFoodEffect(status, entity)) {
 				entity.removeStatusEffect(status.getEffectType());
 				clearedStatuses.add(status);
+			} else if (isFoodEffect(((HiddenEffectAccessorMixin)status).getHiddenEffect(),entity)){
+				((HiddenEffectAccessorMixin)status).setHiddenEffect(null);
 			}
 		}
-		return clearedStatuses;
 	}
 
+	public static void applyHungerScaledHealth(LivingEntity target, float health, float absorption)
+	{
+		float scale=1;
+		if(target.hasStatusEffect(StatusEffects.HUNGER)) {
+			float hunger = target.getStatusEffect(StatusEffects.HUNGER).getAmplifier() + 1;
+			scale /= (hunger+1);
+		}
+		if(target.hasStatusEffect(StatusEffects.SATURATION)) {
+			float saturation = target.getStatusEffect(StatusEffects.SATURATION).getAmplifier() + 1;
+			scale *= (saturation+1);
+		}
+		//If they have the absorption effect, clear it so that it doesn't mess with the food's absorption when it expires
+		target.removeStatusEffect(StatusEffects.ABSORPTION);
+		target.setAbsorptionAmount(scale*absorption);
+		target.heal(scale*health);
+	}
 	public static boolean applyFoodHealthToEntity(Item item, LivingEntity eater)
 	{
 		if(item.isFood())
 		{
 			FoodComponent food = item.getFoodComponent();
-			//If they have the absorption effect, clear it so that it doesn't mess with the food's absorption when it expires
-			eater.removeStatusEffect(StatusEffects.ABSORPTION);
-			eater.setAbsorptionAmount(absorptionFrom(food));
-			eater.heal(healingFrom(food));
+			applyHungerScaledHealth(eater,healingFrom(food),absorptionFrom(food));
 			return true;
 		}
 		else
@@ -108,7 +144,7 @@ public class FoodProcessor {
 	public static void applyFoodStatusesToEntity(ItemStack stack, LivingEntity eater)
 	{
 		Collection<StatusEffectInstance> statuses = getStatusInstancesFrom(stack);
-		for(StatusEffectInstance instance:statuses) {
+		for(StatusEffectInstance instance:statuses){
 			eater.addStatusEffect(instance);
 		}
 	}
