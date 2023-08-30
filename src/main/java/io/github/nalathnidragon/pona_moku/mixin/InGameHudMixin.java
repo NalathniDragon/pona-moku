@@ -16,7 +16,7 @@ public abstract class InGameHudMixin {
 	*/
 
 	@ModifyConstant(method="renderStatusBars", constant=@Constant(intValue = 10, ordinal = 0), slice=@Slice(from=@At(value="INVOKE_STRING",target="Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args={"ldc=food"})))
-	private int disruptLoop(int value)
+	private int pona_moku$disruptLoop(int value)
 	{
 		return 0;
 	}

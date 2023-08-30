@@ -35,6 +35,11 @@ public final class PonaMokuConfig extends ReflectiveConfig {
 
 	@Comment("Whether the Nausea status should prevent the player from being able to eat.")
 	public final TrackedValue<Boolean> nausea_prevents_eating = value(true);
+
+	@Comment("Amount of damage sufficient to interrupt eating. 0 to disable.")
+	public final TrackedValue<Float> interrupt_eating_threshold = value(2f);
+
+
 /*
 	@Comment("Test Value")
 	public final TrackedValue<Double> test = value(1.0);
