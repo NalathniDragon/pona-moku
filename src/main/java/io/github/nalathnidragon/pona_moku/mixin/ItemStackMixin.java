@@ -7,17 +7,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -42,10 +38,7 @@ public abstract class ItemStackMixin {
 			FoodComponent food=this.getItem().getFoodComponent();
 			float absorbHearts = FoodProcessor.absorptionFrom(food) / 2;
 			float healHearts = FoodProcessor.healingFrom(food) / 2;
-			MutableText label=Text.literal(String.format("❤+%.1f",healHearts)).formatted(Formatting.RED);
-			label=label.append(Text.literal(String.format(" ❤%.1f",absorbHearts)).formatted(Formatting.YELLOW));
-			label=label.append(Text.literal(String.format(" %.1fs",this.getMaxUseTime()/20.0)).formatted(Formatting.GRAY));
-			list.add(label);
+			list.add(FoodProcessor.tooltipStats(healHearts,absorbHearts,this.getMaxUseTime()/20.0f,0));
 		}
 		else if(FoodProcessor.proxies.containsKey(this.getItem()))
 		{
